@@ -148,8 +148,7 @@ jobs:
       - name: Install Ansible & WinRM Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y ansible
-          python3 -m pip install pywinrm
+          sudo apt-get install -y ansible python3-winrm
 
       - name: Download App Artifact
         uses: actions/download-artifact@v4
