@@ -39,9 +39,16 @@ jobs:
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.qualitygate.wait=true \
-            /d:sonar.cs.cobertura.reportsPaths="**/TestResults/**/coverage.cobertura.xml"
+            /d:sonar.cs.cobertura.reportsPaths="TestResults/**/*.xml"
+          
           dotnet build DotNetApp.sln
-          dotnet test DotNetApp.Tests/DotNetApp.Tests.csproj --collect:"XPlat Code Coverage" --results-directory ./TestResults
+          
+          dotnet test DotNetApp.Tests/DotNetApp.Tests.csproj \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./TestResults \
+            --no-build \
+            --verbosity normal
+            
           dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
       - name: Upload Quality & Coverage Report
