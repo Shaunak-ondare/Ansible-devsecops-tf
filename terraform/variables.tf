@@ -19,6 +19,11 @@ variable "windows_password" {
   sensitive   = true
 }
 
+variable "controller_key_name" {
+  type        = string
+  description = "Name of the AWS Key Pair to use for the Ansible Controller"
+}
+
 variable "vpc_cidr" {
   type    = string
   default = "10.20.30.0/24"

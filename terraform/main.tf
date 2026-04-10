@@ -8,11 +8,12 @@ module "vpc" {
 }
 
 module "compute" {
-  source           = "./modules/compute"
-  project_name     = var.project_name
-  vpc_id           = module.vpc.vpc_id
-  public_subnet_id = module.vpc.public_subnet_id
-  public_key       = var.ssh_public_key
-  windows_password = var.windows_password
-  instance_type    = var.instance_type
+  source              = "./modules/compute"
+  project_name        = var.project_name
+  vpc_id              = module.vpc.vpc_id
+  public_subnet_id    = module.vpc.public_subnet_id
+  public_key          = var.ssh_public_key
+  windows_password    = var.windows_password
+  controller_key_name = var.controller_key_name
+  instance_type       = var.instance_type
 }

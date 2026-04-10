@@ -17,13 +17,26 @@ data "aws_ami" "windows" {
   }
 }
 
-# Key Pair
-resource "aws_key_pair" "main" {
-  key_name   = "${var.project_name}-key"
-  public_key = var.public_key
+# Security Groups
+resource "aws_security_group" "controller_sg" {
+  name        = "${var.project_name}-controller-sg"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
-# Security Groups
 resource "aws_security_group" "linux_sg" {
   name        = "${var.project_name}-linux-sg"
   vpc_id      = var.vpc_id
@@ -90,26 +103,40 @@ resource "aws_security_group" "windows_sg" {
   }
 }
 
-# Linux Instance
+# Ansible Controller Instance
+resource "aws_instance" "ansible_controller" {
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = var.instance_type
+  subnet_id     = var.public_subnet_id
+  key_name      = var.controller_key_name
+
+  vpc_security_group_ids = [aws_security_group.controller_sg.id]
+
+  tags = {
+    Name = "${var.project_name}-controller"
+  }
+}
+
+# Linux Worker Instance
 resource "aws_instance" "linux_host" {
   ami           = data.aws_ami.ubuntu.id
   instance_type = var.instance_type
   subnet_id     = var.public_subnet_id
-  key_name      = aws_key_pair.main.key_name
+  key_name      = var.controller_key_name
 
   vpc_security_group_ids = [aws_security_group.linux_sg.id]
 
   tags = {
-    Name = "${var.project_name}-linux"
+    Name = "${var.project_name}-linux-worker"
   }
 }
 
-# Windows Instance
+# Windows Worker Instance
 resource "aws_instance" "windows_host" {
   ami           = data.aws_ami.windows.id
   instance_type = var.instance_type
   subnet_id     = var.public_subnet_id
-  key_name      = aws_key_pair.main.key_name
+  key_name      = var.controller_key_name
 
   vpc_security_group_ids = [aws_security_group.windows_sg.id]
 
@@ -134,6 +161,6 @@ powershell.exe -ExecutionPolicy ByPass -File $file
 EOF
 
   tags = {
-    Name = "${var.project_name}-windows"
+    Name = "${var.project_name}-windows-worker"
   }
 }

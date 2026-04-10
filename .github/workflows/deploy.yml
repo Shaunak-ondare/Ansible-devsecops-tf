@@ -129,6 +129,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
           TF_VAR_windows_password: ${{ secrets.WINDOWS_PASSWORD }}
+          TF_VAR_controller_key_name: Mumbai1
 
       - name: Get Outputs
         id: output
@@ -136,6 +137,7 @@ jobs:
         run: |
           echo "linux_ip=$(terraform output -raw linux_public_ip)" >> $GITHUB_OUTPUT
           echo "windows_ip=$(terraform output -raw windows_public_ip)" >> $GITHUB_OUTPUT
+          echo "controller_ip=$(terraform output -raw controller_public_ip)" >> $GITHUB_OUTPUT
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -147,32 +149,48 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Isolated Ansible Environment
-        run: |
-          python3 -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
-          pip install ansible pywinrm requests
-          ansible-galaxy collection install ansible.windows community.windows
-
       - name: Download App Artifact
         uses: actions/download-artifact@v4
         with:
           name: published-app
-          path: DotNetApp/dist/ # Need to ensure this is shared if multi-job
+          path: DotNetApp/dist/
 
-      # Note: For real world, we'd use artifacts to pass files between jobs.
-      # Simplifying: Assume this is all in one large job or use artifacts.
-      
-      - name: Run Ansible Playbook
-        working-directory: ansible
+      - name: Prepare Ansible Controller
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
           chmod 600 id_rsa
-          sed -i "s/LINUX_IP_HERE/${{ needs.terraform.outputs.linux_ip }}/g" inventory.ini
-          sed -i "s/WINDOWS_IP_HERE/${{ needs.terraform.outputs.windows_ip }}/g" inventory.ini
-          sed -i "s|WINDOWS_PASSWORD_HERE|${{ secrets.WINDOWS_PASSWORD }}|g" inventory.ini
           
-          ../venv/bin/ansible-playbook -i inventory.ini playbook.yml
+          # Setup SSH config for easy access
+          mkdir -p ~/.ssh
+          echo "Host controller
+            HostName ${{ needs.terraform.outputs.controller_ip }}
+            User ubuntu
+            IdentityFile $(pwd)/id_rsa
+            StrictHostKeyChecking no
+          " > ~/.ssh/config
+
+          # 1. Bootstrap Ansible on Controller
+          ssh controller "sudo apt-get update && sudo apt-get install -y ansible python3-winrm"
+          
+          # 2. Sync Project Files
+          # Note: We include the id_rsa so the controller can talk to the linux worker
+          scp id_rsa controller:/home/ubuntu/id_rsa
+          ssh controller "chmod 600 /home/ubuntu/id_rsa"
+          
+          # 3. Prepare Inventory with proper IPs and Secrets
+          sed -i "s/LINUX_IP_HERE/${{ needs.terraform.outputs.linux_ip }}/g" ansible/inventory.ini
+          sed -i "s/WINDOWS_IP_HERE/${{ needs.terraform.outputs.windows_ip }}/g" ansible/inventory.ini
+          sed -i "s|WINDOWS_PASSWORD_HERE|${{ secrets.WINDOWS_PASSWORD }}|g" ansible/inventory.ini
+          
+          # 4. Upload Ansible Folder
+          scp -r ansible/ controller:/home/ubuntu/
+          
+          # 5. Upload App Artifact
+          scp DotNetApp/dist/* controller:/home/ubuntu/ansible/
+
+      - name: Execute Remote Playbook
+        run: |
+          ssh controller "export WINDOWS_PASSWORD='${{ secrets.WINDOWS_PASSWORD }}' && cd /home/ubuntu/ansible && ./venv/bin/ansible-playbook -i inventory.ini playbook.yml" || \
+          ssh controller "cd /home/ubuntu/ansible && ansible-playbook -i inventory.ini playbook.yml"
         env:
           ANSIBLE_HOST_KEY_CHECKING: False

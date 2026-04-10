@@ -25,3 +25,8 @@ variable "windows_password" {
   description = "Password for the Windows Administrator account"
   sensitive   = true
 }
+
+variable "controller_key_name" {
+  type        = string
+  description = "Name of the AWS Key Pair to use for the Ansible Controller"
+}
