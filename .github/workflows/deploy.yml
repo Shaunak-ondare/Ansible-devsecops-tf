@@ -145,10 +145,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Ansible & WinRM Dependencies
+      - name: Setup Isolated Ansible Environment
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ansible python3-winrm
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install ansible pywinrm requests
+          ansible-galaxy collection install ansible.windows community.windows
 
       - name: Download App Artifact
         uses: actions/download-artifact@v4
@@ -167,6 +170,7 @@ jobs:
           sed -i "s/LINUX_IP_HERE/${{ needs.terraform.outputs.linux_ip }}/g" inventory.ini
           sed -i "s/WINDOWS_IP_HERE/${{ needs.terraform.outputs.windows_ip }}/g" inventory.ini
           sed -i "s/WINDOWS_PASSWORD_HERE/${{ secrets.WINDOWS_PASSWORD }}/g" inventory.ini
-          ansible-playbook -i inventory.ini playbook.yml
+          
+          ../venv/bin/ansible-playbook -i inventory.ini playbook.yml
         env:
           ANSIBLE_HOST_KEY_CHECKING: False
