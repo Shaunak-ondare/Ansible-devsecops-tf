@@ -14,9 +14,30 @@
     name: mysql-server
     state: present
 
-- name: Install MongoDB
+- name: Install gnupg and curl
   apt:
-    name: mongodb
+    name: "{{ item }}"
+    state: present
+  loop: [gnupg, curl]
+
+- name: Add MongoDB GPG key
+  apt_key:
+    url: https://www.mongodb.org/static/pgp/server-7.0.asc
+    state: present
+
+- name: Add MongoDB repository
+  apt_repository:
+    repo: "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse"
+    state: present
+    filename: mongodb-org-7.0
+
+- name: Update apt cache for MongoDB
+  apt:
+    update_cache: yes
+
+- name: Install MongoDB (Official)
+  apt:
+    name: mongodb-org
     state: present
 
 - name: Ensure Nginx is running
@@ -33,6 +54,6 @@
 
 - name: Ensure MongoDB is running
   service:
-    name: mongodb
+    name: mongod
     state: started
     enabled: yes
