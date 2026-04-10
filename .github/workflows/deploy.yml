@@ -173,6 +173,7 @@ jobs:
 
           # 1. Bootstrap Ansible on Controller
           ssh controller "sudo apt-get update && sudo apt-get install -y ansible python3-winrm"
+          ssh controller "ansible-galaxy collection install ansible.windows community.windows"
           
           # 2. Sync Project Files
           # Note: We include the id_rsa so the controller can talk to the linux worker
@@ -193,7 +194,6 @@ jobs:
 
       - name: Execute Remote Playbook
         run: |
-          ssh controller "export WINDOWS_PASSWORD='${{ secrets.WINDOWS_PASSWORD }}' && cd /home/ubuntu/ansible && ./venv/bin/ansible-playbook -i inventory.ini playbook.yml" || \
-          ssh controller "cd /home/ubuntu/ansible && ansible-playbook -i inventory.ini playbook.yml"
+          ssh controller "export WINDOWS_PASSWORD='${{ secrets.WINDOWS_PASSWORD }}' && cd /home/ubuntu/ansible && ansible-playbook -i inventory.ini playbook.yml"
         env:
           ANSIBLE_HOST_KEY_CHECKING: False
