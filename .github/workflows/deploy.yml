@@ -60,6 +60,12 @@ jobs:
       - name: Publish
         run: dotnet publish DotNetApp/DotNetApp.csproj -c Release -o DotNetApp/dist
 
+      - name: Upload Published App
+        uses: actions/upload-artifact@v4
+        with:
+          name: published-app
+          path: DotNetApp/dist/
+
       # Security & Quality Scans
       - name: Run Snyk scan
         uses: snyk/actions/dotnet@master
