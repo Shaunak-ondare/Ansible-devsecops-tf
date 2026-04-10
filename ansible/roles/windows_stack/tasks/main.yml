@@ -21,7 +21,7 @@
 
 - name: Download .NET 8.0 Hosting Bundle
   ansible.windows.win_get_url:
-    url: https://download.visualstudio.microsoft.com/download/pr/4507119f-de94-4348-8df9-4876b0cf2962/9c83134316f0ac11f185d26857492c3a/dotnet-hosting-8.0.0-win-x64.exe
+    url: https://aka.ms/dotnet/8.0/dotnet-hosting-win.exe
     dest: C:\temp\dotnet-hosting-8.0.0-win-x64.exe
 
 - name: Install .NET 8.0 Hosting Bundle
