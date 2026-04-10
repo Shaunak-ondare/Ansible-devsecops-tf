@@ -187,8 +187,8 @@ jobs:
           # 4. Upload Ansible Folder
           scp -r ansible/ controller:/home/ubuntu/
           
-          # 5. Upload App Artifact
-          scp DotNetApp/dist/* controller:/home/ubuntu/ansible/
+          # 5. Upload App Artifacts
+          scp -r DotNetApp/dist/. controller:/home/ubuntu/ansible/
 
       - name: Execute Remote Playbook
         run: |
