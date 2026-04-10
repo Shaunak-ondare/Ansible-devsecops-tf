@@ -171,7 +171,7 @@ jobs:
           chmod 600 id_rsa
           sed -i "s/LINUX_IP_HERE/${{ needs.terraform.outputs.linux_ip }}/g" inventory.ini
           sed -i "s/WINDOWS_IP_HERE/${{ needs.terraform.outputs.windows_ip }}/g" inventory.ini
-          sed -i "s/WINDOWS_PASSWORD_HERE/${{ secrets.WINDOWS_PASSWORD }}/g" inventory.ini
+          sed -i "s|WINDOWS_PASSWORD_HERE|${{ secrets.WINDOWS_PASSWORD }}|g" inventory.ini
           
           ../venv/bin/ansible-playbook -i inventory.ini playbook.yml
         env:
