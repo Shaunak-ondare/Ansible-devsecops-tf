@@ -188,8 +188,8 @@ jobs:
           # 4. Upload Ansible Folder (Before installing collections into it)
           scp -r ansible/ controller:/home/ubuntu/
           
-          # 5. Install collections DIRECTLY into the project folder for absolute certainty
-          ssh controller "~/ansible_venv/bin/ansible-galaxy collection install -p /home/ubuntu/ansible/collections ansible.windows community.windows"
+          # 5. Install collections
+          ssh controller "~/ansible_venv/bin/ansible-galaxy collection install ansible.windows community.windows"
           
           # 6. Upload App Artifacts (Inject into Role Files)
           ssh controller "mkdir -p /home/ubuntu/ansible/roles/windows_stack/files/app_dist"
