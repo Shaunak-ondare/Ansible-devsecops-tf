@@ -15,7 +15,12 @@
     src: app_dist/
     dest: C:\inetpub\wwwroot\DotNetApp\
 
-- name: Create IIS Site
+- name: Remove Default Web Site
+  win_iis_website:
+    name: "Default Web Site"
+    state: absent
+
+- name: Create or Update IIS Site
   win_iis_website:
     name: "DotNetApp"
     state: started
