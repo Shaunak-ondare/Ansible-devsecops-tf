@@ -180,10 +180,10 @@ jobs:
           scp id_rsa controller:/home/ubuntu/id_rsa
           ssh controller "chmod 600 /home/ubuntu/id_rsa"
           
-          # 3. Prepare Inventory with proper IPs and Secrets
+          # 3. Prepare Inventory with proper IPs
           sed -i "s/LINUX_IP_HERE/${{ needs.terraform.outputs.linux_ip }}/g" ansible/inventory.ini
           sed -i "s/WINDOWS_IP_HERE/${{ needs.terraform.outputs.windows_ip }}/g" ansible/inventory.ini
-          sed -i "s|WINDOWS_PASSWORD_HERE|${{ secrets.WINDOWS_PASSWORD }}|g" ansible/inventory.ini
+          # No more 'sed' for the password - we use ENV variables now!
           
           # 4. Upload Ansible Folder
           scp -r ansible/ controller:/home/ubuntu/
@@ -194,6 +194,8 @@ jobs:
 
       - name: Execute Remote Playbook
         run: |
-          ssh controller "export WINDOWS_PASSWORD='${{ secrets.WINDOWS_PASSWORD }}' && cd /home/ubuntu/ansible && ansible-playbook -i inventory.ini playbook.yml"
+          # We pass the password via Base64 to ensure NO characters get corrupted by the shell
+          export PASS_B64=$(echo -n "${{ secrets.WINDOWS_PASSWORD }}" | base64 -w 0)
+          ssh controller "export WINDOWS_PASSWORD=\$(echo $PASS_B64 | base64 -d) && cd /home/ubuntu/ansible && ansible-playbook -i inventory.ini playbook.yml"
         env:
           ANSIBLE_HOST_KEY_CHECKING: False
