@@ -171,19 +171,20 @@ jobs:
             StrictHostKeyChecking no
           " > ~/.ssh/config
 
-          # 1. Bootstrap Ansible on Controller
-          ssh controller "sudo apt-get update && sudo apt-get install -y ansible python3-winrm"
-          ssh controller "ansible-galaxy collection install ansible.windows community.windows"
+          # 1. Bootstrap Modern Ansible in a Venv on the Controller
+          ssh controller "sudo apt-get update && sudo apt-get install -y python3-pip python3-venv"
+          ssh controller "python3 -m venv ~/ansible_venv"
+          ssh controller "~/ansible_venv/bin/pip install --upgrade pip"
+          ssh controller "~/ansible_venv/bin/pip install ansible pywinrm requests"
+          ssh controller "~/ansible_venv/bin/ansible-galaxy collection install ansible.windows community.windows"
           
           # 2. Sync Project Files
-          # Note: We include the id_rsa so the controller can talk to the linux worker
           scp id_rsa controller:/home/ubuntu/id_rsa
           ssh controller "chmod 600 /home/ubuntu/id_rsa"
           
           # 3. Prepare Inventory with proper IPs
           sed -i "s/LINUX_IP_HERE/${{ needs.terraform.outputs.linux_ip }}/g" ansible/inventory.ini
           sed -i "s/WINDOWS_IP_HERE/${{ needs.terraform.outputs.windows_ip }}/g" ansible/inventory.ini
-          # No more 'sed' for the password - we use ENV variables now!
           
           # 4. Upload Ansible Folder
           scp -r ansible/ controller:/home/ubuntu/
@@ -196,6 +197,6 @@ jobs:
         run: |
           # We pass the password via Base64 to ensure NO characters get corrupted by the shell
           export PASS_B64=$(echo -n "${{ secrets.WINDOWS_PASSWORD }}" | base64 -w 0)
-          ssh controller "export WINDOWS_PASSWORD=\$(echo $PASS_B64 | base64 -d) && cd /home/ubuntu/ansible && ansible-playbook -i inventory.ini playbook.yml"
+          ssh controller "export WINDOWS_PASSWORD=\$(echo $PASS_B64 | base64 -d) && cd /home/ubuntu/ansible && /home/ubuntu/ansible_venv/bin/ansible-playbook -i inventory.ini playbook.yml"
         env:
           ANSIBLE_HOST_KEY_CHECKING: False
