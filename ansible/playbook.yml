@@ -1,11 +1,16 @@
 - name: Configure Linux Server
   hosts: linux
   become: yes
+  collections:
+    - ansible.builtin
   roles:
     - linux_stack
 
 - name: Configure Windows Server
   hosts: windows
   become: no
+  collections:
+    - ansible.windows
+    - community.windows
   roles:
     - windows_stack

@@ -176,9 +176,8 @@ jobs:
           ssh controller "python3 -m venv ~/ansible_venv"
           ssh controller "~/ansible_venv/bin/pip install --upgrade pip"
           ssh controller "~/ansible_venv/bin/pip install ansible pywinrm requests"
-          ssh controller "~/ansible_venv/bin/ansible-galaxy collection install ansible.windows community.windows"
           
-          # 2. Sync Project Files
+          # 2. Sync Project Files (including id_rsa)
           scp id_rsa controller:/home/ubuntu/id_rsa
           ssh controller "chmod 600 /home/ubuntu/id_rsa"
           
@@ -186,10 +185,13 @@ jobs:
           sed -i "s/LINUX_IP_HERE/${{ needs.terraform.outputs.linux_ip }}/g" ansible/inventory.ini
           sed -i "s/WINDOWS_IP_HERE/${{ needs.terraform.outputs.windows_ip }}/g" ansible/inventory.ini
           
-          # 4. Upload Ansible Folder
+          # 4. Upload Ansible Folder (Before installing collections into it)
           scp -r ansible/ controller:/home/ubuntu/
           
-          # 5. Upload App Artifacts (Inject into Role Files)
+          # 5. Install collections DIRECTLY into the project folder for absolute certainty
+          ssh controller "~/ansible_venv/bin/ansible-galaxy collection install -p /home/ubuntu/ansible/collections ansible.windows community.windows"
+          
+          # 6. Upload App Artifacts (Inject into Role Files)
           ssh controller "mkdir -p /home/ubuntu/ansible/roles/windows_stack/files/app_dist"
           scp -r DotNetApp/dist/. controller:/home/ubuntu/ansible/roles/windows_stack/files/app_dist/
 
