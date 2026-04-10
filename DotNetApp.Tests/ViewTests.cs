@@ -25,8 +25,8 @@ public class ViewTests : IClassFixture<WebApplicationFactory<Program>>
 
         // Assert
         response.EnsureSuccessStatusCode();
-        content.Should().Contain("Welcome");
-        content.Should().Contain("Glassmorphism");
+        content.Should().Contain("Future of .NET");
+        content.Should().Contain("Infrastructure");
     }
 
     [Fact]

@@ -38,7 +38,6 @@ jobs:
           dotnet-sonarscanner begin /k:"Shaunak-ondare_Ansible-devsecops-tf" /o:"shaunak-ondare" \
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.qualitygate.wait=true \
             /d:sonar.cs.cobertura.reportsPaths="TestResults/**/*.xml"
           
           dotnet build DotNetApp.sln
