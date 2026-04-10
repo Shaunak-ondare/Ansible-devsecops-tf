@@ -1,10 +1,11 @@
----
 - name: Configure Linux Server
   hosts: linux
+  become: yes
   roles:
     - linux_stack
 
 - name: Configure Windows Server
   hosts: windows
+  become: no
   roles:
     - windows_stack
