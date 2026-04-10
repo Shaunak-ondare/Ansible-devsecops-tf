@@ -1,0 +1,24 @@
+---
+- name: Install IIS Web Server
+  win_feature:
+    name: Web-Server
+    state: present
+    include_management_tools: yes
+
+- name: Create directory for .NET App
+  win_file:
+    path: C:\inetpub\wwwroot\DotNetApp
+    state: directory
+
+- name: Copy .NET Published files
+  win_copy:
+    src: ../../DotNetApp/dist/ # Assumes published files are here
+    dest: C:\inetpub\wwwroot\DotNetApp\
+
+- name: Create IIS Site
+  win_iis_website:
+    name: "DotNetApp"
+    state: started
+    port: 80
+    physical_path: C:\inetpub\wwwroot\DotNetApp
+    state: started

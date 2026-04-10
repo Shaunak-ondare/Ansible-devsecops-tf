@@ -1,0 +1,10 @@
+---
+- name: Configure Linux Server
+  hosts: linux
+  roles:
+    - linux_stack
+
+- name: Configure Windows Server
+  hosts: windows
+  roles:
+    - windows_stack
