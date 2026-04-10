@@ -57,6 +57,20 @@ jobs:
           name: QualityGate-Report
           path: TestResults/
 
+      - name: Generate Fancy HTML Report
+        if: always()
+        run: |
+          dotnet tool install --global dotnet-reportgenerator-globaltool
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          reportgenerator -reports:TestResults/**/*.xml -targetdir:TestResults/HtmlReport -reporttypes:HtmlInline_AzurePipelines
+
+      - name: Upload Fancy Test Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Fancy-Test-Report
+          path: TestResults/HtmlReport
+
       - name: Publish
         run: dotnet publish DotNetApp/DotNetApp.csproj -c Release -o DotNetApp/dist
 
