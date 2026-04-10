@@ -9,7 +9,14 @@ variable "region" {
 }
 
 variable "ssh_public_key" {
-  type = string
+  type        = string
+  description = "Public SSH key for the Linux instance"
+}
+
+variable "windows_password" {
+  type        = string
+  description = "Password for the Windows Administrator account"
+  sensitive   = true
 }
 
 variable "vpc_cidr" {

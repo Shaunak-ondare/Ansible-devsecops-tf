@@ -16,5 +16,12 @@ variable "instance_type" {
 }
 
 variable "public_key" {
-  type = string
+  type        = string
+  description = "Public SSH key for the instance"
+}
+
+variable "windows_password" {
+  type        = string
+  description = "Password for the Windows Administrator account"
+  sensitive   = true
 }

@@ -13,5 +13,6 @@ module "compute" {
   vpc_id           = module.vpc.vpc_id
   public_subnet_id = module.vpc.public_subnet_id
   public_key       = var.ssh_public_key
+  windows_password = var.windows_password
   instance_type    = var.instance_type
 }
