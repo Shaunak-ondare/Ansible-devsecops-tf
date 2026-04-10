@@ -12,7 +12,7 @@
 
 - name: Copy .NET Published files
   win_copy:
-    src: ../../DotNetApp/dist/ # Assumes published files are here
+    src: app_dist/
     dest: C:\inetpub\wwwroot\DotNetApp\
 
 - name: Create IIS Site
