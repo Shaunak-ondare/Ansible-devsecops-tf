@@ -15,6 +15,30 @@
     src: app_dist/
     dest: C:\inetpub\wwwroot\DotNetApp\
 
+- name: Ensure temp directory exists
+  win_file:
+    path: C:\temp
+    state: directory
+
+- name: Download .NET 8.0 Hosting Bundle
+  win_get_url:
+    url: https://download.visualstudio.microsoft.com/download/pr/4507119f-de94-4348-8df9-4876b0cf2962/9c83134316f0ac11f185d26857492c3a/dotnet-hosting-8.0.0-win-x64.exe
+    dest: C:\temp\dotnet-hosting-8.0.0-win-x64.exe
+
+- name: Install .NET 8.0 Hosting Bundle
+  win_package:
+    path: C:\temp\dotnet-hosting-8.0.0-win-x64.exe
+    arguments: /install /quiet /norestart
+    state: present
+    expected_return_code: [0, 1641, 3010]
+
+- name: Create or Update IIS App Pool
+  win_iis_apppool:
+    name: "DotNetAppPool"
+    state: started
+    managed_pipeline_mode: Integrated
+    managed_runtime_version: "" # This sets it to "No Managed Code"
+
 - name: Remove Default Web Site
   win_iis_website:
     name: "Default Web Site"
@@ -26,3 +50,7 @@
     state: started
     port: 80
     physical_path: C:\inetpub\wwwroot\DotNetApp
+    application_pool: "DotNetAppPool"
+
+- name: Restart IIS to apply Hosting Bundle
+  win_shell: iisreset
