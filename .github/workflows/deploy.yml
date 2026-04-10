@@ -96,6 +96,7 @@ jobs:
     outputs:
       linux_ip: ${{ steps.output.outputs.linux_ip }}
       windows_ip: ${{ steps.output.outputs.windows_ip }}
+      controller_ip: ${{ steps.output.outputs.controller_ip }}
     steps:
       - uses: actions/checkout@v4
 
