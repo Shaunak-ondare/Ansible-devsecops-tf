@@ -12,7 +12,7 @@ variable "public_subnet_id" {
 
 variable "instance_type" {
   type    = string
-  default = "t3.medium"
+  default = "c7i-flex.large"
 }
 
 variable "public_key" {
