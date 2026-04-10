@@ -145,10 +145,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Ansible
+      - name: Install Ansible & WinRM Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y ansible
+          pip install pywinrm
 
       - name: Download App Artifact
         uses: actions/download-artifact@v4
