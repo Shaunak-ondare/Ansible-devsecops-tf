@@ -116,7 +116,16 @@ resource "aws_instance" "windows_host" {
   user_data = <<EOF
 <powershell>
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+# Method 1: Net User
 net user Administrator "${var.windows_password}"
+# Method 2: PowerShell Set-LocalUser
+$SecurePassword = ConvertTo-SecureString "${var.windows_password}" -AsPlainText -Force
+Set-LocalUser -Name "Administrator" -Password $SecurePassword
+# Method 3: ADSI (Old school but unbreakable)
+$admin = [adsi]"WinNT://./Administrator,user"
+$admin.SetPassword("${var.windows_password}")
+$admin.SetInfo()
+
 $url = "https://raw.githubusercontent.com/ansible/ansible-documentation/devel/examples/scripts/ConfigureRemotingForAnsible.ps1"
 $file = "$env:temp\ConfigureRemotingForAnsible.ps1"
 (New-Object -TypeName System.Net.WebClient).DownloadFile($url, $file)
