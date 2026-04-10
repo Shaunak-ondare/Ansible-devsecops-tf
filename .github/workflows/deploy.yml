@@ -149,7 +149,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y ansible
-          pip install pywinrm
+          python3 -m pip install pywinrm
 
       - name: Download App Artifact
         uses: actions/download-artifact@v4
