@@ -5,11 +5,8 @@ namespace DotNetApp.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
-
-    public HomeController(ILogger<HomeController> _logger)
+    public HomeController()
     {
-        this._logger = _logger;
     }
 
     public IActionResult Index()
