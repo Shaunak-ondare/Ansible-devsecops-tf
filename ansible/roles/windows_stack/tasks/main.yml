@@ -32,7 +32,7 @@
     expected_return_code: [0, 1641, 3010]
 
 - name: Create or Update IIS App Pool
-  community.windows.win_iis_apppool:
+  community.windows.win_iis_webapppool:
     name: "DotNetAppPool"
     state: started
     managed_pipeline_mode: Integrated
