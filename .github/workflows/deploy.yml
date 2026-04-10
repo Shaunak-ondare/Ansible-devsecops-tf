@@ -15,10 +15,29 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+
+      - name: Install SonarCloud scanner
+        run: dotnet tool install --global dotnet-sonarscanner
+
       - name: Restore dependencies
         run: dotnet restore DotNetApp/DotNetApp.csproj
 
-      - name: Build and Publish
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          dotnet-sonarscanner begin /k:"Shaunak-ondare_Ansible-devsecops-tf" /o:"shaunak-ondare" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
+          dotnet build DotNetApp/DotNetApp.csproj
+          dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+
+      - name: Publish
         run: dotnet publish DotNetApp/DotNetApp.csproj -c Release -o DotNetApp/dist
 
       # Security & Quality Scans
@@ -29,15 +48,6 @@ jobs:
         with:
           args: --all-projects
 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-scan-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
-            -Dsonar.projectKey=YourProjectKey
 
   terraform:
     needs: build-and-scan
