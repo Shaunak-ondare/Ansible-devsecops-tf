@@ -1,4 +1,4 @@
-# 🚀 Ansible-devsecops-tf: Hybrid Hybrid Cloud Infrastructure CI/CD
+# 🚀 Ansible-devsecops-tf: Hybrid Cloud Infrastructure CI/CD
 
 This project demonstrates a fully automated, secure, and multi-cloud-ready infrastructure deployment. It combines **Terraform** for infrastructure as code, **Ansible** for configuration management, and a robust **GitHub Actions** CI/CD pipeline integrated with **Snyk** and **SonarCloud**.
 
