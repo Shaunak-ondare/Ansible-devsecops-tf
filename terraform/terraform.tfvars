@@ -11,7 +11,3 @@ availability_zone   = "ap-south-1a"
 # --- Compute ---
 instance_type = "c7i-flex.large"
 
-# --- Security (Managed via GitHub Secrets) ---
-# Note: ssh_public_key is handled in the CI/CD pipeline.
-# If running locally, you can uncomment and add it here:
-# ssh_public_key = "ssh-rsa YOUR_KEY_HERE"
